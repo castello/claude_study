@@ -6,3 +6,11 @@ export interface Post {
   createdAt: string;
   views: number;
 }
+
+export interface Comment {
+  id: number;
+  postId: number;
+  author: string;
+  content: string;
+  createdAt: string;
+}
