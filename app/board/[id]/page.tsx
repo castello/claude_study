@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPostById, incrementViews } from "@/lib/data";
+import { getPostById, incrementViews, getCommentsByPostId } from "@/lib/data";
 import DeleteButton from "@/components/DeleteButton";
+import CommentForm from "@/components/CommentForm";
+import CommentList from "@/components/CommentList";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -22,6 +24,8 @@ export default async function PostDetailPage({ params }: PageProps) {
   }
 
   incrementViews(postId);
+
+  const comments = getCommentsByPostId(postId);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -60,6 +64,18 @@ export default async function PostDetailPage({ params }: PageProps) {
               </Link>
               <DeleteButton postId={post.id} />
             </div>
+          </div>
+
+          <div className="mt-8 space-y-6">
+            <div className="border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h2 className="text-2xl font-bold">
+                댓글 <span className="text-blue-600">({comments.length})</span>
+              </h2>
+            </div>
+
+            <CommentList comments={comments} />
+
+            <CommentForm postId={post.id} />
           </div>
         </div>
       </main>

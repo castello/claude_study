@@ -1,4 +1,4 @@
-import { Post } from "./types";
+import { Post, Comment } from "./types";
 
 // 임시 데이터 (실제로는 데이터베이스를 사용해야 합니다)
 export let posts: Post[] = [
@@ -68,4 +68,31 @@ export function incrementViews(id: number): void {
   if (post) {
     post.views += 1;
   }
+}
+
+// 댓글 데이터
+export let comments: Comment[] = [];
+
+export function getCommentsByPostId(postId: number): Comment[] {
+  return comments
+    .filter((comment) => comment.postId === postId)
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+}
+
+export function createComment(comment: Omit<Comment, "id" | "createdAt">): Comment {
+  const newComment: Comment = {
+    ...comment,
+    id: Math.max(...comments.map(c => c.id), 0) + 1,
+    createdAt: new Date().toISOString(),
+  };
+  comments.push(newComment);
+  return newComment;
+}
+
+export function deleteComment(id: number): boolean {
+  const index = comments.findIndex(comment => comment.id === id);
+  if (index === -1) return false;
+
+  comments.splice(index, 1);
+  return true;
 }
