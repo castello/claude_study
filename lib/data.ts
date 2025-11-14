@@ -1,4 +1,15 @@
 import { Post, Comment } from "./types";
+import fs from "fs";
+import path from "path";
+
+// 데이터 파일 경로
+const DATA_DIR = path.join(process.cwd(), "data");
+const COMMENTS_FILE = path.join(DATA_DIR, "comments.json");
+
+// 데이터 디렉토리 생성
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
 
 // 임시 데이터 (실제로는 데이터베이스를 사용해야 합니다)
 export let posts: Post[] = [
@@ -70,8 +81,54 @@ export function incrementViews(id: number): void {
   }
 }
 
+// 댓글 JSON 파일에서 로드
+function loadComments(): Comment[] {
+  try {
+    if (fs.existsSync(COMMENTS_FILE)) {
+      const data = fs.readFileSync(COMMENTS_FILE, "utf-8");
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error("Error loading comments:", error);
+  }
+
+  // 파일이 없거나 오류가 발생하면 기본 댓글 반환
+  return [
+    {
+      id: 1,
+      postId: 1,
+      author: "방문자1",
+      content: "좋은 정보 감사합니다!",
+      createdAt: new Date("2024-01-15T10:30:00").toISOString(),
+    },
+    {
+      id: 2,
+      postId: 1,
+      author: "개발자",
+      content: "Next.js는 정말 강력한 프레임워크네요.",
+      createdAt: new Date("2024-01-15T14:20:00").toISOString(),
+    },
+    {
+      id: 3,
+      postId: 2,
+      author: "학습자",
+      content: "App Router를 사용하면 서버 컴포넌트를 쉽게 활용할 수 있어서 좋습니다.",
+      createdAt: new Date("2024-01-16T09:15:00").toISOString(),
+    },
+  ];
+}
+
+// 댓글 JSON 파일에 저장
+function saveComments(commentsData: Comment[]): void {
+  try {
+    fs.writeFileSync(COMMENTS_FILE, JSON.stringify(commentsData, null, 2), "utf-8");
+  } catch (error) {
+    console.error("Error saving comments:", error);
+  }
+}
+
 // 댓글 데이터
-export let comments: Comment[] = [];
+export let comments: Comment[] = loadComments();
 
 export function getCommentsByPostId(postId: number): Comment[] {
   return comments
@@ -86,6 +143,7 @@ export function createComment(comment: Omit<Comment, "id" | "createdAt">): Comme
     createdAt: new Date().toISOString(),
   };
   comments.push(newComment);
+  saveComments(comments);
   return newComment;
 }
 
@@ -94,5 +152,6 @@ export function deleteComment(id: number): boolean {
   if (index === -1) return false;
 
   comments.splice(index, 1);
+  saveComments(comments);
   return true;
 }
