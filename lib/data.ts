@@ -92,8 +92,8 @@ function loadComments(): Comment[] {
     console.error("Error loading comments:", error);
   }
 
-  // 파일이 없거나 오류가 발생하면 기본 댓글 반환
-  return [
+  // 파일이 없거나 오류가 발생하면 기본 댓글 생성 및 저장
+  const defaultComments: Comment[] = [
     {
       id: 1,
       postId: 1,
@@ -116,6 +116,10 @@ function loadComments(): Comment[] {
       createdAt: new Date("2024-01-16T09:15:00").toISOString(),
     },
   ];
+
+  // 기본 댓글을 파일에 저장
+  saveComments(defaultComments);
+  return defaultComments;
 }
 
 // 댓글 JSON 파일에 저장
